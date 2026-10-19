@@ -1,0 +1,8 @@
+{
+  "name": "JariKilat - Game Mengetik 10 Jari",
+  "description": "Game latihan mengetik 10 jari interaktif dengan panduan visual keyboard dan tangan real-time, level bertahap, analisis akurasi per jari, dan papan peringkat global.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
