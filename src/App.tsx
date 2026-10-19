@@ -241,8 +241,16 @@ export default function App() {
       />
 
       {/* Minimal Footer */}
-      <footer className="border-t border-slate-900 py-4 text-center text-xs text-slate-400">
+      <footer className="border-t border-slate-900 py-4 px-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3 max-w-6xl mx-auto w-full">
         <p>JariKilat 10 · Game Edukasi Mengetik Sepuluh Jari Cepat & Presisi</p>
+        <a
+          href="https://trakteer.id/bang.iki/gift"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-rose-400 hover:text-rose-300 font-semibold transition-colors"
+        >
+          <span>☕ Traktir kopi pengembang di Trakteer</span>
+        </a>
       </footer>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LevelItem } from '../types/typing';
+import { AdBanner } from './AdBanner';
 import { Play, Sparkles, Code2, BookOpen, Clock, FileText } from 'lucide-react';
 
 interface CustomPracticeProps {
@@ -182,6 +183,9 @@ export const CustomPractice: React.FC<CustomPracticeProps> = ({ onStartCustomLev
           </button>
         </div>
       </div>
+
+      {/* Google AdSense Display Banner */}
+      <AdBanner />
     </div>
   );
 };

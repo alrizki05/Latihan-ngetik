@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LeaderboardItem, UserProfile } from '../types/typing';
+import { getFirestoreLeaderboard } from '../lib/firebase';
+import { AdBanner } from './AdBanner';
 import { Trophy, Medal, Search, RefreshCw, Zap, CheckCircle2, Globe, Users, Flame } from 'lucide-react';
 
 interface LeaderboardViewProps {
@@ -22,13 +24,18 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
     averageWpm: 74,
   });
 
-  const fetchLeaderboard = useCallback(async () => {
+  const fetchLeaderboard = useCallback(async (forceRefresh: boolean = false) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/leaderboard?category=${filterCategory}&limit=50`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.entries)) {
-        setEntries(data.entries);
+      const firestoreItems = await getFirestoreLeaderboard(filterCategory, 30, forceRefresh);
+      if (firestoreItems && firestoreItems.length > 0) {
+        setEntries(firestoreItems);
+      } else {
+        const res = await fetch(`/api/leaderboard?category=${filterCategory}&limit=30`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.entries)) {
+          setEntries(data.entries);
+        }
       }
     } catch {
       // Fallback
@@ -273,7 +280,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
           </div>
 
           <button
-            onClick={fetchLeaderboard}
+            onClick={() => fetchLeaderboard(true)}
             title="Segarkan Papan Peringkat"
             className="p-2 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
           >
@@ -387,6 +394,9 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Google AdSense Display Banner */}
+      <AdBanner />
     </div>
   );
 };

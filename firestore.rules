@@ -1,0 +1,24 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidScore(data) {
+      return data.playerName is string && data.playerName.size() >= 1 && data.playerName.size() <= 50
+        && data.wpm is number && data.wpm >= 0 && data.wpm <= 300
+        && data.accuracy is number && data.accuracy >= 0 && data.accuracy <= 100
+        && data.levelId is number && data.levelId >= 1
+        && data.timestamp is number;
+    }
+
+    match /leaderboard/{scoreId} {
+      allow read: if true;
+      allow create: if isValidScore(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

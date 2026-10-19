@@ -77,8 +77,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </nav>
 
-        {/* Zone 3: 1 Primary Action */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Zone 3: 1 Primary Action & Support Button */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <a
+            href="https://trakteer.id/bang.iki/gift"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Dukung Pengembang di Trakteer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-300 bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/60 rounded-lg transition-colors whitespace-nowrap shrink-0 shadow-sm"
+          >
+            <span>☕</span>
+            <span className="hidden sm:inline">Traktir Kopi</span>
+          </a>
+
           <button
             onClick={onOpenSettings}
             title="Pengaturan Keyboard & Suara"

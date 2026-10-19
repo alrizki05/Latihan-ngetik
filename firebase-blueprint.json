@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "A high score record submitted by a player on the 10-finger typing game.",
+      "type": "object",
+      "properties": {
+        "playerName": {
+          "type": "string",
+          "description": "Display name of the typist",
+          "maxLength": 50
+        },
+        "avatar": {
+          "type": "string",
+          "description": "Avatar emoji icon",
+          "maxLength": 10
+        },
+        "wpm": {
+          "type": "number",
+          "description": "Words per minute score"
+        },
+        "cpm": {
+          "type": "number",
+          "description": "Characters per minute score"
+        },
+        "accuracy": {
+          "type": "number",
+          "description": "Percentage of keystroke accuracy"
+        },
+        "levelId": {
+          "type": "number",
+          "description": "Identifier of the level completed"
+        },
+        "levelTitle": {
+          "type": "string",
+          "description": "Title of the level played",
+          "maxLength": 100
+        },
+        "category": {
+          "type": "string",
+          "description": "Skill tier category (beginner, intermediate, master, challenge)",
+          "enum": ["beginner", "intermediate", "master", "challenge"]
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Epoch timestamp in milliseconds"
+        },
+        "dateStr": {
+          "type": "string",
+          "description": "Human readable date label",
+          "maxLength": 50
+        },
+        "country": {
+          "type": "string",
+          "description": "Country code",
+          "maxLength": 10
+        }
+      },
+      "required": ["playerName", "wpm", "accuracy", "levelId", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/leaderboard/{scoreId}": {
+      "schema": {
+        "$ref": "#/entities/LeaderboardEntry"
+      },
+      "description": "Global typing practice high scores submitted by players worldwide"
+    }
+  }
+}

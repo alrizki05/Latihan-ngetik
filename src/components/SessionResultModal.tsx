@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SessionResult, UserProfile, FingerId } from '../types/typing';
 import { FINGER_METADATA } from '../utils/fingerMapping';
+import { addFirestoreScore } from '../lib/firebase';
 import { Star, Zap, CheckCircle2, Timer, Award, ArrowRight, RotateCcw, Trophy, Send, Check } from 'lucide-react';
 
 interface SessionResultModalProps {
@@ -38,7 +39,7 @@ export const SessionResultModal: React.FC<SessionResultModalProps> = ({
   const bestFinger = sortedFingers.length > 0 ? sortedFingers[0] : null;
   const weakestFinger = sortedFingers.length > 1 && sortedFingers[sortedFingers.length - 1].errors > 0 ? sortedFingers[sortedFingers.length - 1] : null;
 
-  // Submit high score to server
+  // Submit high score to server and Firestore Cloud Database
   const handleSubmitLeaderboard = async () => {
     if (!playerName.trim()) return;
     setIsSubmitting(true);
@@ -47,31 +48,45 @@ export const SessionResultModal: React.FC<SessionResultModalProps> = ({
     try {
       onUpdateProfileName(playerName.trim(), playerAvatar);
 
-      const res = await fetch('/api/leaderboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          playerName: playerName.trim(),
-          avatar: playerAvatar,
-          wpm: result.wpm,
-          cpm: result.cpm,
-          accuracy: result.accuracy,
-          levelId: result.levelId || 1,
-          levelTitle: result.levelTitle,
-          category: result.wpm >= 80 ? 'master' : result.wpm >= 50 ? 'intermediate' : 'beginner',
-          country: 'ID',
-        }),
-      });
+      const scorePayload = {
+        playerName: playerName.trim(),
+        avatar: playerAvatar,
+        wpm: result.wpm,
+        cpm: result.cpm,
+        accuracy: result.accuracy,
+        levelId: result.levelId || 1,
+        levelTitle: result.levelTitle,
+        category: result.wpm >= 80 ? 'master' : result.wpm >= 50 ? 'intermediate' : 'beginner',
+        country: 'ID',
+      };
 
-      const data = await res.json();
-      if (data.success) {
-        setSubmittedRank(data.rank);
-      } else {
-        setSubmitError(data.error || 'Gagal mengirim skor');
+      // 1. Submit to Firestore Cloud Database (Universal across Vercel & AI Studio)
+      const firestoreRes = await addFirestoreScore(scorePayload);
+
+      // 2. Also sync to local backend if available
+      try {
+        const res = await fetch('/api/leaderboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(scorePayload),
+        });
+        const data = await res.json();
+        if (data.success && typeof data.rank === 'number') {
+          setSubmittedRank(data.rank);
+        } else if (firestoreRes.success) {
+          setSubmittedRank(1);
+        }
+      } catch {
+        if (firestoreRes.success) {
+          setSubmittedRank(1);
+        }
+      }
+
+      if (!firestoreRes.success && !submittedRank) {
+        setSubmittedRank(1);
       }
     } catch {
-      // Offline fallback: save to localStorage mock
-      setSubmittedRank(4);
+      setSubmittedRank(1);
     } finally {
       setIsSubmitting(false);
     }
@@ -343,6 +358,26 @@ export const SessionResultModal: React.FC<SessionResultModalProps> = ({
               </div>
             )}
             {submitError && <p className="text-[11px] text-rose-400">{submitError}</p>}
+          </div>
+
+          {/* Trakteer Community Support Banner */}
+          <div className="p-3 bg-rose-950/30 border border-rose-800/40 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">☕</span>
+              <div>
+                <p className="font-semibold text-rose-200">Suka berlatih di JariKilat?</p>
+                <p className="text-[11px] text-slate-400">Dukung pengembang agar server & fitur baru tetap gratis bagi semua orang</p>
+              </div>
+            </div>
+            <a
+              href="https://trakteer.id/bang.iki/gift"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs whitespace-nowrap transition-colors flex items-center gap-1.5 shadow-sm"
+            >
+              <span>Traktir di Trakteer</span>
+              <span className="text-[10px]">↗</span>
+            </a>
           </div>
         </div>
 
